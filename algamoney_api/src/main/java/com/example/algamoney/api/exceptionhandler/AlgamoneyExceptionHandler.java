@@ -3,7 +3,6 @@ package com.example.algamoney.api.exceptionhandler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +20,27 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.example.algamoney.api.service.exception.PessoaInexistenteOuInativaException;
+
+/**
+ * @author andreBolzan
+ *
+ */
+/**
+ * @author andreBolzan
+ *
+ */
+/**
+ * @author andreBolzan
+ *
+ */
+/**
+ * @author andreBolzan
+ *
+ */
 @ControllerAdvice
 public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -55,7 +72,14 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 		String mensagemDesenvolvedor = ExceptionUtils.getRootCauseMessage(ex);
 		List<Erro> erros = Arrays.asList(new Erro(mensagemUsuario, mensagemDesenvolvedor));
 		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
-		
+	}
+	
+	@ExceptionHandler({InvalidDataAccessApiUsageException.class})
+	public ResponseEntity<Object> handleInvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException ex, WebRequest request){		
+		String mensagemUsuario = messageSource.getMessage("pessoa.inexistente-ou-inativa", null, LocaleContextHolder.getLocale());
+		String mensagemDesenvolvedor = ExceptionUtils.getRootCauseMessage(ex);
+		List<Erro> erros = Arrays.asList(new Erro(mensagemUsuario, mensagemDesenvolvedor));
+		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
 	}
 
 	@Override 
@@ -64,6 +88,9 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 		List<Erro> erros = criarlistaErros(ex.getBindingResult());
 		return handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
 	}
+	
+	
+	
 	
 	private List<Erro> criarlistaErros(BindingResult binding) {
 		
@@ -74,12 +101,10 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 			String mensagemDesenvolvedor = fieldErro.toString();
 			erros.add(new Erro(mensagemUsuario, mensagemDesenvolvedor));
 		}
-		
-		
 		return erros;
 	}
 
-	static class Erro {
+	public static class Erro {
 
 		private String mensagemUsuario;
 		private String mensagemDesenvolvedor;
